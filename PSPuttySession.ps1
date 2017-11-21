@@ -14,7 +14,6 @@ Function ConvertFrom-Base64
     }
     catch {
         Write-Error "Failed to decode string"
-        exit
     }
 
 }
@@ -34,7 +33,6 @@ Function Get-DnsTxt
     }
     catch {
         Write-Error "Failed to get DNS TXT record"
-        exit
     }
 }
 
@@ -59,17 +57,14 @@ Function ConvertTo-PSCredential {
                 $script:cred = $credential
             } else {
                 Write-Error -Message "Failed to process base64 string"
-                exit
             }            
         }
         else {
             Write-Error -Message "Failed to process base64 string"
-            exit
         }
     }
     catch {
         Write-Error -Message "Failed to process base64 string"
-        exit
     }
 }
 
@@ -109,9 +104,24 @@ function Start-AwxTemplate
     }
     catch {
         Write-Error -Message "Failed to invoke AWX job"  
-        exit  
     }
 
+}
+
+function New-ProjectSpace
+{
+    $workingDir = 'PSPuttySession'
+    $temp = $env:TEMP
+    $script:tmpDir = Join-Path -Path $temp -ChildPath $workingDir
+
+    if(-not (Test-Path -Path $tmpDir)) {
+        try {
+            $newDir = New-Item -ItemType Directory -Force -Path $tmpDir -ErrorAction Stop
+        }
+        catch {
+            Write-Error -Message "Failed to create working directory"  
+        }
+    }
 }
 
 
