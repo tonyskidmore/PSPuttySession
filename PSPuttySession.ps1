@@ -240,8 +240,7 @@ function Invoke-PuttySession
     try {
         $puttyPath = Join-Path -Path $tmpDir -ChildPath 'putty.exe'
         $argumentList = "$User@$Hostname -i $PrivateKey -hostkey $HostKey"
-        Write-Output $puttyPath
-        Write-Output $argumentList
+
         $result = Start-Process -FilePath $puttyPath -ArgumentList $argumentList -NoNewWindow -ErrorAction Stop
     }
     catch {
