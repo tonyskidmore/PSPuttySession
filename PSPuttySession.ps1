@@ -1,3 +1,11 @@
+[CmdletBinding(DefaultParameterSetName='Base64 Credentials')]
+[OutputType('System.Management.Automation.PSObject')]
+Param
+(
+    [switch]
+    $SkipUserSetup
+)
+
 #region functions
 
 Function ConvertFrom-Base64
@@ -9,6 +17,8 @@ Function ConvertFrom-Base64
         $InputObject
     )
     
+    if($SkipUserSetup) { return }
+
     try {
         [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($InputObject))
     }
@@ -20,13 +30,19 @@ Function ConvertFrom-Base64
 
 function Get-UserName
 {
-
-  $script:UserName = $(($($env:USERNAME).Split('.')[0])[0]) + $($env:USERNAME).Split('.')[1]
-
+    if(($env:USERNAME).IndexOf('.')) {
+        $script:UserName = $(($($env:USERNAME).Split('.')[0])[0]) + $($env:USERNAME).Split('.')[1]
+    }
+    else {
+        $script:UserName = $env:USERNAME    
+    }
 }
 
 Function Get-DnsTxt
 {
+
+    if($SkipUserSetup) { return }
+
     try {
         $txtEntry = Resolve-DnsName -Name demorest.cloud-msp.net -Type TXT -ErrorAction Stop
         $txtEntry.Strings
@@ -45,6 +61,8 @@ Function ConvertTo-PSCredential {
         [string]
         $InputObject
     )
+
+    if($SkipUserSetup) { return }
 
     $u = $InputObject.split(':',2)[0]
     $p = $InputObject.split(':',2)[1]
@@ -70,6 +88,8 @@ Function ConvertTo-PSCredential {
 
 function Wait-Random {
 
+    if($SkipUserSetup) { return }
+
     $random = Get-Random -Minimum 1 -Maximum 30
 
     for($i = 1 ; $i -lt $random ; $i++) {
@@ -80,6 +100,8 @@ function Wait-Random {
 
 function Start-AwxTemplate
 {
+
+    if($SkipUserSetup) { return }
 
     $hashData = @{
         demo_user = $UserName
@@ -108,6 +130,25 @@ function Start-AwxTemplate
 
 }
 
+function Get-Putty
+{
+    Param(
+
+        $Url = 'https://the.earth.li/~sgtatham/putty/latest/w32/putty.exe'
+    )
+
+    $outputFile = "$tmpDir\putty.exe"
+
+
+    #try {
+        Invoke-WebRequest -Uri $Url -OutFile $outputFile -ErrorAction Stop
+    #}
+    #catch {
+    #    Write-Error -Message "Failed to download putty"
+    #}
+
+}
+
 function New-ProjectSpace
 {
     $workingDir = 'PSPuttySession'
@@ -127,8 +168,13 @@ function New-ProjectSpace
 
 #endregion functions
 
+# main script execution
 Get-DnsTxt | ConvertFrom-Base64 | ConvertTo-PSCredential
 Get-UserName
 Wait-Random
 Start-AwxTemplate
+New-ProjectSpace
+Get-Putty
+
+
 Write-Output "Your username is: $UserName"
