@@ -290,8 +290,8 @@ Wait-Random
 Start-AwxTemplate
 New-ProjectSpace
 Get-Putty
-Set-HostKey
-if(Get-Key -and Set-HostKey) { 
+$setKey = Set-HostKey
+if(Get-Key -and $setKey) { 
     Write-Output "Your username is: $UserName"    
     Invoke-PuttySession 
 }
