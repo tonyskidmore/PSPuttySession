@@ -43,6 +43,12 @@ Function Get-DnsTxt
 
     if($SkipUserSetup) { return }
 
+    if(-not (Get-Command -Name Resolve-DnsName -ErrorAction SilentlyContinue)) {
+
+        Write-Output "Sorry you are running an OLD unsupported version on Windows, cannot continue"
+        exit
+    }
+
     try {
         $txtEntry = Resolve-DnsName -Name demorest.cloud-msp.net -Type TXT -ErrorAction Stop
         $txtEntry.Strings
