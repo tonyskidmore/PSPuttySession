@@ -45,8 +45,15 @@ Function Get-DnsTxt
 
     if(-not (Get-Command -Name Resolve-DnsName -ErrorAction SilentlyContinue)) {
 
-        Write-Host "Sorry you are running an OLD unsupported version on Windows, cannot continue" -ForegroundColor Red
-        exit 1
+        # attempting old school method
+        $txtEntry = Get-DnsTxtNslookup
+        if($txtEntry -lt 10) {
+            Write-Host "Sorry you are running an old version of Windows and we could not use an alternate method to lookup TXT record, cannot continue" -ForegroundColor Red
+            exit 1
+        }
+        else {
+            return $txtEntry  
+        }
     }
 
     try {
@@ -55,6 +62,26 @@ Function Get-DnsTxt
     }
     catch {
         Write-Error "Failed to get DNS TXT record"
+    }
+}
+
+function Get-DnsTxtNslookup
+{
+    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+    $pinfo.FileName = "$env:SystemRoot\System32\nslookup.exe"
+    $pinfo.RedirectStandardError = $true
+    $pinfo.RedirectStandardOutput = $true
+    $pinfo.UseShellExecute = $false
+    $pinfo.Arguments = "-querytype=TXT -timeout=10 demorest.cloud-msp.net"
+    $p = New-Object System.Diagnostics.Process
+    $p.StartInfo = $pinfo
+    $p.Start() | Out-Null
+    $p.WaitForExit()
+    $stdout = $p.StandardOutput.ReadToEnd()
+    $stderr = $p.StandardError.ReadToEnd()
+
+    if($stdout -match "demorest.cloud-msp.net") {
+        $stdout|%{$_.split('"')[1]}
     }
 }
 
