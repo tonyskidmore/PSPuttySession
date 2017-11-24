@@ -30,7 +30,7 @@ Function ConvertFrom-Base64
 
 function Get-UserName
 {
-    if(($env:USERNAME).IndexOf('.')) {
+    if(($env:USERNAME).IndexOf('.') -gt 0) {
         $script:UserName = $(($($env:USERNAME).Split('.')[0])[0]) + $($env:USERNAME).Split('.')[1]
     }
     else {
@@ -99,9 +99,11 @@ function Wait-Random {
     $random = Get-Random -Minimum 1 -Maximum 30
 
     for($i = 1 ; $i -lt $random ; $i++) {
-        Write-Progress -Activity "Throttling mechnism" -PercentComplete ($i/$random*100)    
+        Write-Progress -Activity "Throttling mechanism" -PercentComplete ($i/$random*100)    
         Start-Sleep -Seconds 1
     }
+
+    Write-Progress -Activity "Throttling mechanism" -Completed
 }
 
 function Start-AwxTemplate
@@ -167,12 +169,26 @@ ac0971'
     $regName = 'rsa2@22:jumphost.cloud-msp.net'
 
     try {
+        if(-not (Test-Path -Path HKCU:\software\SimonTatham\PuTTY\SshHostKeys -ErrorAction Stop)) {
+            $puttyRoot = New-Item -Path HKCU:\software\SimonTatham\
+            $puttyReg = New-Item -Path HKCU:\software\SimonTatham\PuTTY
+            $puttySshHostKey = New-Item -Path HKCU:\software\SimonTatham\PuTTY -Name SshHostKeys -ErrorAction Stop
+        }
+    }
+    catch {
+        Write-Error -Message "Failed create putty registry key"
+        return $false    
+    }
+
+    try {
         $newProperty = New-ItemProperty -Path "HKCU:\software\SimonTatham\PuTTY\SshHostKeys" -Name $regName -Value $HostKey -PropertyType String -Force -ErrorAction Stop | Out-Null
     }
     catch {
-        Write-Error -Message "Failed to set hostkey"        
+        Write-Error -Message "Failed to set hostkey"
+        return $false
     }
     
+    return $true
 }
 
 function Get-Key
@@ -280,8 +296,8 @@ Wait-Random
 Start-AwxTemplate
 New-ProjectSpace
 Get-Putty
-Set-HostKey
-if(Get-Key) { 
+$setKey = Set-HostKey
+if(Get-Key -and $setKey) { 
     Write-Output "Your username is: $UserName"    
     Invoke-PuttySession 
 }
