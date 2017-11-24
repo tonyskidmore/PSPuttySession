@@ -45,8 +45,8 @@ Function Get-DnsTxt
 
     if(-not (Get-Command -Name Resolve-DnsName -ErrorAction SilentlyContinue)) {
 
-        Write-Output "Sorry you are running an OLD unsupported version on Windows, cannot continue"
-        exit
+        Write-Host "Sorry you are running an OLD unsupported version on Windows, cannot continue" -ForegroundColor Red
+        exit 1
     }
 
     try {
