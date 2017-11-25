@@ -30,12 +30,20 @@ Function ConvertFrom-Base64
 
 function Get-UserName
 {
-    if(($env:USERNAME).IndexOf('.') -gt 0) {
-        $script:UserName = $(($($env:USERNAME).Split('.')[0])[0]) + $($env:USERNAME).Split('.')[1]
+
+    Param (
+
+        $User = $env:USERNAME
+
+    )
+
+    if(($User).IndexOf('.') -gt 0) {
+        $script:UserName = $(($($User).Split('.')[0])[0]) + $($User).Split('.')[-1]
     }
     else {
-        $script:UserName = $env:USERNAME    
+        $script:UserName = $User    
     }
+    $Username
 }
 
 Function Get-DnsTxt
