@@ -155,7 +155,7 @@ function Start-AwxTemplate
     }
 
     $params = @{
-        'Uri' = 'http://awxdemo.cloud-msp.net/api/v2/job_templates/7/launch/'
+        'Uri' = 'http://ansible.cloud-msp.net/api/v2/job_templates/6/launch/'
         'Credential' = $cred
         'Method' = 'Post'
         'ContentType' = 'application/json'
@@ -194,12 +194,31 @@ function Get-Putty
 
 }
 
+function Get-PSScript
+{
+    Param(
+
+        $Url = 'https://raw.githubusercontent.com/tonyskidmore/PSPuttySession/master/PSPuttySession.ps1'
+    )
+
+    $outputFile = "$tmpDir\PSPuttySession.ps1"
+
+
+    try {
+        if(-not (Test-Path -Path $outputFile)) {
+            Invoke-WebRequest -Uri $Url -OutFile $outputFile -ErrorAction Stop
+        }
+    }
+    catch {
+        Write-Error -Message "Failed to download PS script"
+    }
+
+}
+
 function Set-HostKey
 {
 
-    $HostKey = '0x10001,0xb5c2a1b057775cc1336dcd8edc08a60d3648970c39b489f904a02352abd617332815d6f94cc9017209c26345a133379d4c9a8552d34c6d4a1d6539a8d5d015068868e19c28e215243de5587383b8dca8a270942dcb781ab05542e6f7e7d80f63fbf3a0390aa8dba6dac230c74682d475dfb97a9bea085e6f406cce64
-eeb0baab350dd252563e8b609baf6c465a8f9d3c74af745a3567ac835c19b548f0d409910029bda89e16ade19869bd043271daf1532160c5088b8bb3b6c4eb77f766bd42c2e2299794edad1b17cf8eee9d8e152321ff75f99c1715d061361cf4a919eddfe38416e9aa577afde28d9d9eb42aa0d117e6ef9fa8e9665932c643f3ba
-ac0971'
+    $HostKey = '0x10001,0xe127dd89afacb7f4dc6a1e3193b07f66e6f1ee4fa840cf2c7921d3f7b50283f72cf0e464232483b0869440c27458fdbbb4e87449de53d3cf2fd000ef2a7d329c325972885d5dd5aef0f7cf15fe897d6d98af1a31d76933c061e15962df081804a20165fe4b8ea9360d0a3466e4dcd3d75dc4e5519209e00b817a436ccdeac150321d04a9cef64a10d8117217d6f2f956a9d49b19e508511a7af87ba35bfe4d8ebcb06074ef57050dc8337dcca805923a72a74fbc21a90301db8d7b3bf939c99d63c2d7e2bf69e192f3619a328a76a36e78132b3ba219ca4ca7f532159a11344cb60b5bccca08c3380ed39c3dabf7a4044f700eddad5683dd93cfa57f744d16d3'
 
     $regName = 'rsa2@22:jumphost.cloud-msp.net'
 
@@ -291,7 +310,7 @@ function Invoke-PuttySession
         $PrivateKey = (Join-Path -Path $tmpDir -ChildPath "$UserName.ppk"),
 
         [string]
-        $HostKey = '3d:de:ea:73:7b:d4:43:8f:d1:f5:41:c4:ca:b0:39:a7'
+        $HostKey = '2b:8a:67:2e:0e:a3:a3:39:d7:da:0b:2f:6a:c6:fb:ab'
     )
 
     try {
@@ -331,6 +350,7 @@ Wait-Random
 Start-AwxTemplate
 New-ProjectSpace
 Get-Putty
+Get-PSScript
 $setKey = Set-HostKey
 if(Get-Key -and $setKey) { 
     Write-Output "Your username is: $UserName"    
