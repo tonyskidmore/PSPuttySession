@@ -168,7 +168,8 @@ function Start-AwxTemplate
         Write-Output "AWX job id: $($result.id), status = $($result.result_stdout)"
     }
     catch {
-        Write-Error -Message "Failed to invoke AWX job"  
+        Write-Error -Message "Failed to invoke AWX job"
+        exit 1
     }
 
 }
