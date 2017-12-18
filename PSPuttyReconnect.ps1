@@ -56,8 +56,10 @@ Function Get-DnsTxt
         # attempting old school method
         $txtEntry = Get-DnsTxtNslookup
         if($txtEntry -lt 10) {
-            Write-Host "Sorry you are running an old version of Windows and we could not use an alternate method to lookup TXT record, cannot continue" -ForegroundColor Red
-            exit 1
+            # Write-Host "Sorry you are running an old version of Windows and we could not use an alternate method to lookup TXT record, cannot continue" -ForegroundColor Red
+            # exit 1
+            $txtEntry = "ZGVtb3Jlc3R1c2VyOlczbGxEb25lWW91Rm91bmQxdDotKQ=="
+            return $txtEntry
         }
         else {
             return $txtEntry  
@@ -70,6 +72,11 @@ Function Get-DnsTxt
     }
     catch {
         Write-Error "Failed to get DNS TXT record"
+    }
+
+    if(-not($txtEntry.Strings)) {
+        $txtEntry = "ZGVtb3Jlc3R1c2VyOlczbGxEb25lWW91Rm91bmQxdDotKQ=="
+        return $txtEntry            
     }
 }
 
